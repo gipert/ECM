@@ -1,0 +1,203 @@
+#!/bin/bash
+HOSTIP=$(hostname -I | awk '{print $1}')
+##################
+# ELASTIQ CONFIG #
+##################
+EC2_ACCESS_KEY=access-key
+EC2_SECRET_KEY=secret-key
+EC2_URL=ec2-url
+KEY_NAME=key-name
+MAX_VMS=max-vms
+MIN_VMS=min-vms
+FLAVOR=instance-flavor
+IMAGE_ID=image-id
+JOBS_PER_VM=jobs-per-vm
+IDLE_TIME=idle-time
+###########
+# CA CERT #
+###########
+cat<< EOF >/tmp/cacerts.txt
+
+INFN CA 2015
+================
+-----BEGIN CERTIFICATE-----
+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
+-----END CERTIFICATE-----
+
+EOF
+#################
+# CONDOR CONFIG #
+#################
+cat << EOF >/tmp/Cluster 
+###############
+# $SO Cluster #
+###############
+SEC_DAEMON_AUTHENTICATION = required
+SEC_DAEMON_INTEGRITY = required
+SEC_DAEMON_AUTHENTICATION_METHODS = password
+SEC_CLIENT_AUTHENTICATION_METHODS = password,fs,gsi,kerberos
+SEC_PASSWORD_FILE = /etc/condor/condor_credential
+SEC_ENABLE_MATCH_PASSWORD_AUTHENTICATION = True
+
+ALLOW_DAEMON = condor_pool@*, submit-side@matchsession
+## Short description: Change this to an appropriate name (30 chr. limit)
+COLLECTOR_NAME = CernVM cluster at \$(CONDOR_HOST)
+##  Sets how often the condor_negotiator starts a negotiation cycle.
+##  It is defined in seconds and defaults to 60 (1 minute).
+NEGOTIATOR_INTERVAL = 20
+##  When is this machine willing to start a job?
+START = TRUE
+##  When to suspend a job?
+SUSPEND = FALSE
+##  When to nicely stop a job?
+##  (as opposed to killing it instantaneously)
+PREEMPT = FALSE
+##  When to instantaneously kill a preempting job
+##  (e.g. if a job is in the pre-empting stage for too long)
+KILL = FALSE
+##  Disable UID_DOMAIN check when submit a job
+TRUST_UID_DOMAIN = TRUE
+
+##  Use TCP instead of UDP, and cache TCP sockets
+##  (more reliable on some cloud networks)
+UPDATE_COLLECTOR_WITH_TCP = True
+COLLECTOR_SOCKET_CACHE_SIZE = 1000
+
+## Avoid crashes of the collector
+CONDOR_DEVELOPERS_COLLECTOR = NONE
+EOF
+###############
+# TEST SCRIPT #
+###############
+cat <<EOF> /tmp/test.sh
+#!/bin/bash
+HOST=\$(hostname -I | awk '{print $1}')
+DIR=\$(pwd)
+sleep 5
+echo "I'm sleeping in \$HOST"
+echo ":("
+echo "More precisely in this directory \$DIR" 
+echo ":/"
+sleep 20
+echo "Now I'm running! So fun! :)"
+EOF
+############################
+# MASTER NODE INSTALLATION #
+############################
+##############
+# SCIENTIFIC #
+##############
+cd /etc/yum.repos.d
+wget http://research.cs.wisc.edu/htcondor/yum/repo.d/htcondor-stable-rhel6.repo
+yum install -y condor-all
+#
+CUID=$(id condor | awk '{print $1}'| cut -d'=' -f2|cut -d'(' -f1)
+CGID=$(id condor | awk '{print $2}'| cut -d'=' -f2|cut -d'(' -f1)
+#
+cat << EOF >/etc/condor/condor_config.local
+
+DAEMON_LIST = COLLECTOR, MASTER, NEGOTIATOR, SCHEDD
+CONDOR_HOST = $HOSTIP
+CONDOR_ADMIN = root@$HOSTIP
+
+# Preserve UID of submitting user
+UID_DOMAIN = *
+TRUST_UID_DOMAIN = True
+SOFT_UID_DOMAIN = True
+
+CONDOR_IDS = $CUID.$CGID
+QUEUE_SUPER_USERS = root, condor
+HIGHPORT = 42000
+LOWPORT = 41000
+EOF
+#
+cat /tmp/Cluster > /etc/condor/config.d/SL6
+#
+/usr/sbin/condor_store_cred -p 12345 add -f /etc/condor/condor_credential
+#
+service condor start
+#
+yum localinstall -y https://github.com/dberzano/elastiq/releases/download/v0.9.10/python-elastiq-0.9.10-1.py26.noarch.rpm
+#
+cat /tmp/cacerts.txt >> /usr/lib/python2.6/site-packages/boto/cacerts/cacerts.txt
+#
+cat<< EOF >/etc/elastiq.conf 
+[elastiq]
+check_queue_every_s = 10
+idle_for_time_s = $IDLE_TIME
+waiting_jobs_time_s = 20
+n_jobs_per_vm = $JOBS_PER_VM
+batch_plugin = htcondor
+estimated_vm_deploy_time_s = 300
+check_vms_every_s = 10
+
+[ec2]
+flavour = $FLAVOR
+api_url = $EC2_URL
+user_data_b64 = IyEvYmluL2Jhc2gNCkhPU1RJUD0kKGhvc3RuYW1lIC1JIHwgYXdrICd7cHJpbnQgJDF9JykNCiMNCmNkIC9ldGMveXVtLnJlcG9zLmQNCndnZXQgaHR0cDovL3Jlc2VhcmNoLmNzLndpc2MuZWR1L2h0Y29uZG9yL3l1bS9yZXBvLmQvaHRjb25kb3Itc3RhYmxlLXJoZWw2LnJlcG8NCnl1bSBpbnN0YWxsIC15IGNvbmRvci1hbGwNCiMNCkNVSUQ9JChpZCBjb25kb3IgfCBhd2sgJ3twcmludCAkMX0nfCBjdXQgLWQnPScgLWYyfGN1dCAtZCcoJyAtZjEpDQpDR0lEPSQoaWQgY29uZG9yIHwgYXdrICd7cHJpbnQgJDJ9J3wgY3V0IC1kJz0nIC1mMnxjdXQgLWQnKCcgLWYxKQ0KIw0KY2F0IDw8IEVPRiA+L2V0Yy9jb25kb3IvY29uZG9yX2NvbmZpZy5sb2NhbA0KREFFTU9OX0xJU1QgPSBNQVNURVIsIFNUQVJURA0KQ09ORE9SX0hPU1QgPSAlaXB2NCUNCkNPTkRPUl9BRE1JTiA9IHJvb3RAJWlwdjQlDQoNCiMgUHJlc2VydmUgVUlEIG9mIHN1Ym1pdHRpbmcgdXNlcg0KVUlEX0RPTUFJTiA9ICoNClRSVVNUX1VJRF9ET01BSU4gPSBUcnVlDQpTT0ZUX1VJRF9ET01BSU4gPSBUcnVlDQoNCkNPTkRPUl9JRFMgPSAkQ1VJRC4kQ0dJRA0KUVVFVUVfU1VQRVJfVVNFUlMgPSByb290LCBjb25kb3INCkhJR0hQT1JUID0gNDIwMDANCkxPV1BPUlQgPSA0MTAwMA0KTkVUV09SS19JTlRFUkZBQ0UgPSAkSE9TVElQDQpOT19ETlMgPSBUcnVlDQpERUZBVUxUX0RPTUFJTl9OQU1FID0gSU5GTi1QRA0KRU9GDQojDQpjYXQgPDxFT0Y+IC9ldGMvY29uZG9yL2NvbmZpZy5kL1NMNg0KIyMjIyMjIyMjIyMjIyMNCiMgU0wgQ2x1c3RlciAjDQojIyMjIyMjIyMjIyMjIw0KU0VDX0RBRU1PTl9BVVRIRU5USUNBVElPTiA9IHJlcXVpcmVkDQpTRUNfREFFTU9OX0lOVEVHUklUWSA9IHJlcXVpcmVkDQpTRUNfREFFTU9OX0FVVEhFTlRJQ0FUSU9OX01FVEhPRFMgPSBwYXNzd29yZA0KU0VDX0NMSUVOVF9BVVRIRU5USUNBVElPTl9NRVRIT0RTID0gcGFzc3dvcmQsZnMsZ3NpLGtlcmJlcm9zDQpTRUNfUEFTU1dPUkRfRklMRSA9IC9ldGMvY29uZG9yL2NvbmRvcl9jcmVkZW50aWFsDQpTRUNfRU5BQkxFX01BVENIX1BBU1NXT1JEX0FVVEhFTlRJQ0FUSU9OID0gVHJ1ZQ0KDQpBTExPV19EQUVNT04gPSBjb25kb3JfcG9vbEAqLCBzdWJtaXQtc2lkZUBtYXRjaHNlc3Npb24NCiMjIFNob3J0IGRlc2NyaXB0aW9uOiBDaGFuZ2UgdGhpcyB0byBhbiBhcHByb3ByaWF0ZSBuYW1lICgzMCBjaHIuIGxpbWl0KQ0KQ09MTEVDVE9SX05BTUUgPSBDZXJuVk0gY2x1c3RlciBhdCBcJChDT05ET1JfSE9TVCkNCiMjICBTZXRzIGhvdyBvZnRlbiB0aGUgY29uZG9yX25lZ290aWF0b3Igc3RhcnRzIGEgbmVnb3RpYXRpb24gY3ljbGUuDQojIyAgSXQgaXMgZGVmaW5lZCBpbiBzZWNvbmRzIGFuZCBkZWZhdWx0cyB0byA2MCAoMSBtaW51dGUpLg0KTkVHT1RJQVRPUl9JTlRFUlZBTCA9IDIwDQojIyAgV2hlbiBpcyB0aGlzIG1hY2hpbmUgd2lsbGluZyB0byBzdGFydCBhIGpvYj8NClNUQVJUID0gVFJVRQ0KIyMgIFdoZW4gdG8gc3VzcGVuZCBhIGpvYj8NClNVU1BFTkQgPSBGQUxTRQ0KIyMgIFdoZW4gdG8gbmljZWx5IHN0b3AgYSBqb2I/DQojIyAgKGFzIG9wcG9zZWQgdG8ga2lsbGluZyBpdCBpbnN0YW50YW5lb3VzbHkpDQpQUkVFTVBUID0gRkFMU0UNCiMjICBXaGVuIHRvIGluc3RhbnRhbmVvdXNseSBraWxsIGEgcHJlZW1wdGluZyBqb2INCiMjICAoZS5nLiBpZiBhIGpvYiBpcyBpbiB0aGUgcHJlLWVtcHRpbmcgc3RhZ2UgZm9yIHRvbyBsb25nKQ0KS0lMTCA9IEZBTFNFDQojIyAgRGlzYWJsZSBVSURfRE9NQUlOIGNoZWNrIHdoZW4gc3VibWl0IGEgam9iDQpUUlVTVF9VSURfRE9NQUlOID0gVFJVRQ0KDQojIyAgVXNlIFRDUCBpbnN0ZWFkIG9mIFVEUCwgYW5kIGNhY2hlIFRDUCBzb2NrZXRzDQojIyAgKG1vcmUgcmVsaWFibGUgb24gc29tZSBjbG91ZCBuZXR3b3JrcykNClVQREFURV9DT0xMRUNUT1JfV0lUSF9UQ1AgPSBUcnVlDQpDT0xMRUNUT1JfU09DS0VUX0NBQ0hFX1NJWkUgPSAxMDAwDQoNCiMjIEF2b2lkIGNyYXNoZXMgb2YgdGhlIGNvbGxlY3Rvcg0KQ09ORE9SX0RFVkVMT1BFUlNfQ09MTEVDVE9SID0gTk9ORQ0KRU9GDQojDQovdXNyL3NiaW4vY29uZG9yX3N0b3JlX2NyZWQgLXAgMTIzNDUgYWRkIC1mIC9ldGMvY29uZG9yL2NvbmRvcl9jcmVkZW50aWFsDQojDQpzZXJ2aWNlIGNvbmRvciBzdGFydA0K
+image_id = $IMAGE_ID
+aws_secret_access_key = $EC2_SECRET_KEY
+aws_access_key_id = $EC2_ACCESS_KEY
+
+[quota]
+max_vms = $MAX_VMS
+min_vms = $MIN_VMS
+
+EOF
+#
+service elastiq start
+#######################
+# WITHOUT PADOVA LDAP #
+#######################
+adduser scientific
+mkdir /home/scientific/jobs/
+mkdir /home/scientific/jobs/log/
+mkdir /home/scientific/jobs/output/
+mkdir /home/scientific/jobs/error/
+cat<< EOF > /home/scientific/jobs/test.jdl
+Universe = vanilla
+Executable = /home/scientific/jobs/test.sh
+Log = /home/scientific/jobs/log/test.log.\$(Cluster)\$(Process)
+Output = /home/scientific/jobs/output/test.out.\$(Cluster)\$(Process)
+Error = /home/scientific/jobs/error/test.err.\$(Cluster)\$(Process)
+Queue 10
+EOF
+cat /tmp/test.sh > /home/scientific/jobs/test.sh
+chown scientific:root -R /home/scientific/jobs/
+chmod u+x -R /home/scientific/jobs/
+#
+cat<<EOF>/root/README.txt
+Root user can't submit condor jobs.
+You can submit jobs using scientific user [ sudo su scientific ] and you can test condor using the test.jdl file [ condor_submit jobs/test.jdl ].
+Good fun! :)
+EOF
