@@ -105,11 +105,11 @@ HOST=\$(hostname -I | awk '{print $1}')
 DIR=\$(pwd)
 sleep 5
 echo "I'm sleeping in \$HOST"
-echo ":("
+echo ":-("
 echo "More precisely in this directory \$DIR" 
-echo ":/"
+echo ":-/"
 sleep 20
-echo "Now I'm running! So fun! :)"
+echo "Now I'm running! So fun! :-)"
 EOF
 ############################
 # MASTER NODE INSTALLATION #
@@ -156,13 +156,13 @@ cat /tmp/cacerts.txt >> /usr/lib/python2.7/dist-packages/boto/cacerts/cacerts.tx
 #
 cat<< EOF >/etc/elastiq.conf 
 [elastiq]
-check_queue_every_s = 10
+check_queue_every_s = 45
 idle_for_time_s = $IDLE_TIME
-waiting_jobs_time_s = 20
+waiting_jobs_time_s = 45
 n_jobs_per_vm = $JOBS_PER_VM
 batch_plugin = htcondor
-estimated_vm_deploy_time_s = 300
-check_vms_every_s = 10
+estimated_vm_deploy_time_s = 1200
+check_vms_every_s = 45
 
 [ec2]
 flavour = $FLAVOR

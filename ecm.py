@@ -10,18 +10,18 @@ method = [(1, "Dashboard. [INFO] You use the genereted userdata file as portinst
            (2, "Euca2ools. [WARNING] You have to have euca2ools.2.x installed in your PC."),
            (3, "Nova CLI. [WARNING] You have to have nova-client installed in your PC.")]
            
-SL_images = [(1, "SL67-x86_64-20151017", "ami-0000031e"),
-          (2, "SL66-x86_64-20150521", "ami-000001b5"),
-          (3, "SL66-x86_64-20150309", "ami-00000160"),
-          (4, "SL66-x86_64-20150131", "ami-000000e0"),
-          (5, "SL65-x86_64-20151029", "ami-00000336"),
+SL_images = [(1, "SL67-x86_64-20151017", "ami-09877a78"),
+          (2, "SL66-x86_64-20150521", "ami-d558813f"),
+          (3, "SL66-x86_64-20150309", "ami-55829d60"),
+          (4, "SL66-x86_64-20150131", "ami-dc9da54c"),
+          (5, "SL65-x86_64-20151029", "ami-d760f202"),
           (6, "Other image. [WARNING] You have to know the EC2-id of image", "ami-")]
-ubuntu_images = [(1, "ubuntu-trusty-20141025", "ami-00000010"),
+ubuntu_images = [(1, "ubuntu-trusty-20141025", "ami-84616f8f"),
           (2, "Other image. [WARNING] You have to know the EC2-id of image", "ami-")]
-cern_images = [(1, "uCernVM 3.4.3", "ami-0000028b"),
-          (2, "uCernVM 2.3-0", "ami-0000031b"),
-          (3, "uCernVM 1.18.14", "ami-0000015c"),
-          (4, "uCernVM 1.18.13", "ami-000000db"),
+cern_images = [(1, "uCernVM 3.4.3", "ami-fcfdc38d"),
+          (2, "uCernVM 2.3-0", "ami-c84d00a7"),
+          (3, "uCernVM 1.18.14", "ami-aebb6e5f"),
+          (4, "uCernVM 1.18.13", "ami-7ad4ec84"),
           (5, "Other image. [WARNING] You have to know the EC2-id of image", "ami-")]
 if __name__ == "__main__":
 
