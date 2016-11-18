@@ -6,7 +6,6 @@ HOSTIP=$(hostname -I | awk '{print $1}')
 EC2_ACCESS_KEY=access-key
 EC2_SECRET_KEY=secret-key
 EC2_URL=ec2-url
-KEY_NAME=key-name
 MAX_VMS=max-vms
 MIN_VMS=min-vms
 FLAVOR=instance-flavor
