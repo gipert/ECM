@@ -45,6 +45,7 @@ if __name__ == "__main__":
     min_vms = params['MIN_VMS']
     jobs_per_vm = params['JOBS_PER_VM']
     idle_time = params['IDLE_TIME']
+    key_name = params['KEY_NAME']
 
     print("\nChose SO that you want to use for your master and worker nodes:")
     for n, d, so, f in scripts:
@@ -174,64 +175,11 @@ if __name__ == "__main__":
             cl_options = ""
             call([command, cl_options], shell=True)
 
-            print("\nYou can use one of these methods:")
-            for v, k in method:
-                print("%s: %s" % (v, k))
-            how = input("How do you prefer?\n")
-            v = int(how)
-            if v == 1:
-                print("Now you can use the %s file to instantiate the master node of your elastiq cluster." %user_data_file)
-            elif v == 2:
-                print("\nInsert master flavor name:")
-                if int(major_version) < 3:
-                    m_flavor = raw_input()
-                else:
-                    m_flavor = input()
-                if int(major_version) < 3:
-                    group = raw_input("\nInsert master security group name:\n")
-                else:
-                    group = input("\nInsert master security group name:\n")
-                if int(major_version) < 3:
-                    key_name = raw_input("\nInsert master key pair name. [WARNING] If your key pair file name is my_key.pem you have to insert only my_key.\n")
-                else:
-                    key_name = input("\nInsert master key pair name. [WARNING] If your key pair file name is my_key.pem you have to insert only my_key.\n")
-                print("\nNow we are instantiating your master node via euca2ools.\n")
-                command = "euca-run-instances -t %s -k '%s' -f %s -g %s %s" %(m_flavor, key_name, user_data_file, group, image_id)
-                cl_options = ""
-                print(command)
-                call([command, cl_options], shell=True)
-            elif v == 3:
-                print("\nInsert master name:")
-                if int(major_version) < 3:
-                    vm_name = raw_input()
-                else:
-                    vm_name = input()
-                print("\nInsert master image name:")
-                if int(major_version) < 3:
-                    image_name = raw_input()
-                else:
-                    image_name = input()
-                print("\nInsert master flavor name:")
-                if int(major_version) < 3:
-                    m_flavor = raw_input()
-                else:
-                    m_flavor = input()
-                if int(major_version) < 3:
-                    group = raw_input("\nInsert master security group name:\n")
-                else:
-                    group = input("\nInsert master security group name:\n")
-                if int(major_version) < 3:
-                    key_name = raw_input("\nInsert master key pair name. [WARNING] If your key pair file name is my_key.pem you have to insert only my_key.\n")
-                else:
-                    key_name = input("\nInsert master key pair name. [WARNING] If your key pair file name is my_key.pem you have to insert only my_key.\n")
-                print("\nNow we are instantiating your master node via nova-cli.\n")
-                command = "nova boot %s --image \"%s\" --flavor %s --user_data %s --key_name %s --security-group %s" %(vm_name, image_name, m_flavor, user_data_file, key_name, group)
-                cl_options = ""
-                print(command)
-                call([command, cl_options], shell=True)
-            else:
-                exit("[ERROR] Wrong selection.")
+            command = "sed -i \"s|key-name|%s|g\" %s " %(key_name, user_data_file)
+            cl_options = ""
+            call([command, cl_options], shell=True)
 
+            print("Now you can use the %s file to instantiate the master node of your elastiq cluster." %user_data_file)
 
     except IndexError:
         exit("[ERROR] Wrong selection.")

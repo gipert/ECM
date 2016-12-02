@@ -12,6 +12,8 @@ FLAVOR=instance-flavor
 IMAGE_ID=image-id
 JOBS_PER_VM=jobs-per-vm
 IDLE_TIME=idle-time
+KEY_NAME=key-name
+
 ###########
 # CA CERT #
 ###########
@@ -170,6 +172,7 @@ user_data_b64 = IyEvYmluL2Jhc2gNCkhPU1RJUD0kKGhvc3RuYW1lIC1JIHwgYXdrICd7cHJpbnQg
 image_id = $IMAGE_ID
 aws_secret_access_key = $EC2_SECRET_KEY
 aws_access_key_id = $EC2_ACCESS_KEY
+key_name = $KEY_NAME
 
 [quota]
 max_vms = $MAX_VMS
