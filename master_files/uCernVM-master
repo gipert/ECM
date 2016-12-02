@@ -1,3 +1,12 @@
+Content-Type: multipart/mixed; boundary="===============7832870659841679070=="
+MIME-Version: 1.0
+
+--===============7832870659841679070==
+Content-Type: text/plain; charset="us-ascii"
+MIME-Version: 1.0
+Content-Transfer-Encoding: 7bit
+Content-Disposition: attachment; filename="uCernVM-master"
+
 [amiconfig]
 plugins=elastiq-setup condor
 
@@ -11,13 +20,14 @@ condor_group=condor
 uid_domain=*
 
 [elastiq-setup]
-elastiq_check_queue_every_s=45
+elastiq_check_queue_every_s=10
 elastiq_idle_for_time_s=idle-time
-elastiq_waiting_jobs_time_s=45
+elastiq_waiting_jobs_time_s=20
 elastiq_n_jobs_per_vm=jobs-per-vm
 elastiq_batch_plugin=htcondor
-elastiq_estimated_vm_deploy_time_s=1200
-elastiq_check_vms_every_s=45
+elastiq_estimated_vm_deploy_time_s=300
+elastiq_check_vms_every_s=15
+ec2_key_name=key-name
 
 ec2_api_url=ec2-url
 ec2_aws_secret_access_key=secret-key
@@ -31,3 +41,51 @@ cacerts_b64=LS0tLS1CRUdJTiBDRVJUSUZJQ0FURS0tLS0tDQpNSUlGd2pDQ0E2cWdBd0lCQWdJSkFM
 
 quota_min_vms=min-vms
 quota_max_vms=max-vms
+
+--===============7832870659841679070==
+Content-Type: text/x-shellscript; charset="us-ascii"
+MIME-Version: 1.0
+Content-Transfer-Encoding: 7bit
+Content-Disposition: attachment; filename="test_script.sh"
+
+#!/bin/bash
+###############
+# TEST SCRIPT #
+###############
+useradd cernvm
+mkdir /home/cernvm/jobs/
+mkdir /home/cernvm/jobs/log/
+mkdir /home/cernvm/jobs/output/
+mkdir /home/cernvm/jobs/error/
+cat<< EOF > /home/cernvm/jobs/test.jdl
+Universe = vanilla
+Executable = /home/cernvm/jobs/test.sh
+Log = /home/cernvm/jobs/log/test.log.\$(Cluster)\$(Process)
+Output = /home/cernvm/jobs/output/test.out.\$(Cluster)\$(Process)
+Error = /home/cernvm/jobs/error/test.err.\$(Cluster)\$(Process)
+Queue 10
+EOF
+#
+cat <<EOF> /home/cernvm/jobs/test.sh
+#!/bin/bash
+HOST=\$(hostname -I | awk '{print $1}')
+DIR=\$(pwd)
+sleep 5
+echo "I'm sleeping in \$HOST"
+echo ":-("
+echo "More precisely in this directory \$DIR" 
+echo ":-/"
+sleep 20
+echo "Now I'm running! So fun! :-)"
+EOF
+#
+chown cernvm:root -R /home/cernvm/jobs/
+chmod u+x -R /home/cernvm/jobs/
+#
+cat<<EOF>/root/README.txt
+Root user can't submit condor jobs.
+You can submit jobs using cernvm user and you can test condor using the test.jdl file [ condor_submit jobs/test.jdl ].
+Good fun! :)
+EOF
+
+--===============7832870659841679070==--
