@@ -38,7 +38,10 @@ if __name__ == "__main__":
 
     params = dict()
     for line in file:
-        k, v = line.split("=")
+        try:
+            k, v = line.split("=")
+        except:
+            line=line
         params[k] = v.strip()
     w_flavor = params['WNS_FLAVOR']
     max_vms = params['MAX_VMS']
