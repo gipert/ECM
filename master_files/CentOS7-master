@@ -1,5 +1,6 @@
 #!/bin/bash
 HOSTIP=$(hostname -I | awk '{print $1}')
+#
 ##################
 # ELASTIQ CONFIG #
 ##################
@@ -60,9 +61,9 @@ EOF
 # CONDOR CONFIG #
 #################
 cat << EOF >/tmp/Cluster 
-###############
-# SL6 Cluster #
-###############
+###################
+# CentOS7 Cluster #
+###################
 SEC_DAEMON_AUTHENTICATION = required
 SEC_DAEMON_INTEGRITY = required
 SEC_DAEMON_AUTHENTICATION_METHODS = password
@@ -115,26 +116,20 @@ EOF
 ############################
 # MASTER NODE INSTALLATION #
 ############################
-##############
-# SCIENTIFIC #
-##############
+##########
+# CENTOS #
+##########
+echo 0 > /sys/fs/selinux/enforce
+#
+yum install -y wget
+#
 cd /etc/yum.repos.d
-wget http://research.cs.wisc.edu/htcondor/yum/repo.d/htcondor-stable-rhel6.repo
-#
-yum install -y yum-priorities
-cat << EOF >>/etc/yum.repos.d/htcondor-stable-rhel6.repo
-check_obsoletes=1
-priority=1
-EOF
+wget https://research.cs.wisc.edu/htcondor/yum/repo.d/htcondor-stable-rhel7.repo
 yum clean all
-#
 yum install -y condor-all
-#
 CUID=$(id condor | awk '{print $1}'| cut -d'=' -f2|cut -d'(' -f1)
 CGID=$(id condor | awk '{print $2}'| cut -d'=' -f2|cut -d'(' -f1)
-#
 cat << EOF >/etc/condor/condor_config.local
-
 DAEMON_LIST = COLLECTOR, MASTER, NEGOTIATOR, SCHEDD
 CONDOR_HOST = $HOSTIP
 CONDOR_ADMIN = root@$HOSTIP
@@ -149,16 +144,16 @@ QUEUE_SUPER_USERS = root, condor
 HIGHPORT = 42000
 LOWPORT = 41000
 EOF
-#
-cat /tmp/Cluster > /etc/condor/config.d/SL6
+cat /tmp/Cluster > /etc/condor/config.d/CentOS7
 #
 /usr/sbin/condor_store_cred -p 12345 add -f /etc/condor/condor_credential
 #
-service condor start
+systemctl start condor
+systemctl enable condor
 #
-yum localinstall -y https://github.com/dberzano/elastiq/releases/download/v0.9.10/python-elastiq-0.9.10-1.py26.noarch.rpm
+yum localinstall -y https://github.com/dberzano/elastiq/releases/download/v0.9.10/python-elastiq-0.9.10-1.py27.noarch.rpm
 #
-cat /tmp/cacerts.txt >> /usr/lib/python2.6/site-packages/boto/cacerts/cacerts.txt
+cat /tmp/cacerts.txt >> /usr/lib/python2.7/site-packages/boto/cacerts/cacerts.txt
 #
 cat<< EOF >/etc/elastiq.conf 
 [elastiq]
@@ -173,7 +168,7 @@ check_vms_every_s = 45
 [ec2]
 flavour = $FLAVOR
 api_url = $EC2_URL
-user_data_b64 = IyEvYmluL2Jhc2gNCkhPU1RJUD0kKGhvc3RuYW1lIC1JIHwgYXdrICd7cHJpbnQgJDF9JykNCiMNCmNkIC9ldGMveXVtLnJlcG9zLmQNCndnZXQgaHR0cDovL3Jlc2VhcmNoLmNzLndpc2MuZWR1L2h0Y29uZG9yL3l1bS9yZXBvLmQvaHRjb25kb3Itc3RhYmxlLXJoZWw2LnJlcG8NCiMNCnl1bSBpbnN0YWxsIC15IHl1bS1wcmlvcml0aWVzDQpjYXQgPDwgRU9GID4+L2V0Yy95dW0ucmVwb3MuZC9odGNvbmRvci1zdGFibGUtcmhlbDYucmVwbw0KY2hlY2tfb2Jzb2xldGVzPTENCnByaW9yaXR5PTENCkVPRg0KeXVtIGNsZWFuIGFsbA0KIw0KeXVtIGluc3RhbGwgLXkgY29uZG9yLWFsbA0KIw0KQ1VJRD0kKGlkIGNvbmRvciB8IGF3ayAne3ByaW50ICQxfSd8IGN1dCAtZCc9JyAtZjJ8Y3V0IC1kJygnIC1mMSkNCkNHSUQ9JChpZCBjb25kb3IgfCBhd2sgJ3twcmludCAkMn0nfCBjdXQgLWQnPScgLWYyfGN1dCAtZCcoJyAtZjEpDQojDQpjYXQgPDwgRU9GID4vZXRjL2NvbmRvci9jb25kb3JfY29uZmlnLmxvY2FsDQpEQUVNT05fTElTVCA9IE1BU1RFUiwgU1RBUlREDQpDT05ET1JfSE9TVCA9ICVpcHY0JQ0KQ09ORE9SX0FETUlOID0gcm9vdEAlaXB2NCUNCg0KIyBQcmVzZXJ2ZSBVSUQgb2Ygc3VibWl0dGluZyB1c2VyDQpVSURfRE9NQUlOID0gKg0KVFJVU1RfVUlEX0RPTUFJTiA9IFRydWUNClNPRlRfVUlEX0RPTUFJTiA9IFRydWUNCg0KQ09ORE9SX0lEUyA9ICRDVUlELiRDR0lEDQpRVUVVRV9TVVBFUl9VU0VSUyA9IHJvb3QsIGNvbmRvcg0KSElHSFBPUlQgPSA0MjAwMA0KTE9XUE9SVCA9IDQxMDAwDQpORVRXT1JLX0lOVEVSRkFDRSA9ICRIT1NUSVANCk5PX0ROUyA9IFRydWUNCkRFRkFVTFRfRE9NQUlOX05BTUUgPSBJTkZOLVBEDQpFT0YNCiMNCmNhdCA8PEVPRj4gL2V0Yy9jb25kb3IvY29uZmlnLmQvU0w2DQojIyMjIyMjIyMjIyMjIw0KIyBTTCBDbHVzdGVyICMNCiMjIyMjIyMjIyMjIyMjDQpTRUNfREFFTU9OX0FVVEhFTlRJQ0FUSU9OID0gcmVxdWlyZWQNClNFQ19EQUVNT05fSU5URUdSSVRZID0gcmVxdWlyZWQNClNFQ19EQUVNT05fQVVUSEVOVElDQVRJT05fTUVUSE9EUyA9IHBhc3N3b3JkDQpTRUNfQ0xJRU5UX0FVVEhFTlRJQ0FUSU9OX01FVEhPRFMgPSBwYXNzd29yZCxmcyxnc2ksa2VyYmVyb3MNClNFQ19QQVNTV09SRF9GSUxFID0gL2V0Yy9jb25kb3IvY29uZG9yX2NyZWRlbnRpYWwNClNFQ19FTkFCTEVfTUFUQ0hfUEFTU1dPUkRfQVVUSEVOVElDQVRJT04gPSBUcnVlDQoNCkFMTE9XX0RBRU1PTiA9IGNvbmRvcl9wb29sQCosIHN1Ym1pdC1zaWRlQG1hdGNoc2Vzc2lvbg0KIyMgU2hvcnQgZGVzY3JpcHRpb246IENoYW5nZSB0aGlzIHRvIGFuIGFwcHJvcHJpYXRlIG5hbWUgKDMwIGNoci4gbGltaXQpDQpDT0xMRUNUT1JfTkFNRSA9IENlcm5WTSBjbHVzdGVyIGF0IFwkKENPTkRPUl9IT1NUKQ0KIyMgIFNldHMgaG93IG9mdGVuIHRoZSBjb25kb3JfbmVnb3RpYXRvciBzdGFydHMgYSBuZWdvdGlhdGlvbiBjeWNsZS4NCiMjICBJdCBpcyBkZWZpbmVkIGluIHNlY29uZHMgYW5kIGRlZmF1bHRzIHRvIDYwICgxIG1pbnV0ZSkuDQpORUdPVElBVE9SX0lOVEVSVkFMID0gMjANCiMjICBXaGVuIGlzIHRoaXMgbWFjaGluZSB3aWxsaW5nIHRvIHN0YXJ0IGEgam9iPw0KU1RBUlQgPSBUUlVFDQojIyAgV2hlbiB0byBzdXNwZW5kIGEgam9iPw0KU1VTUEVORCA9IEZBTFNFDQojIyAgV2hlbiB0byBuaWNlbHkgc3RvcCBhIGpvYj8NCiMjICAoYXMgb3Bwb3NlZCB0byBraWxsaW5nIGl0IGluc3RhbnRhbmVvdXNseSkNClBSRUVNUFQgPSBGQUxTRQ0KIyMgIFdoZW4gdG8gaW5zdGFudGFuZW91c2x5IGtpbGwgYSBwcmVlbXB0aW5nIGpvYg0KIyMgIChlLmcuIGlmIGEgam9iIGlzIGluIHRoZSBwcmUtZW1wdGluZyBzdGFnZSBmb3IgdG9vIGxvbmcpDQpLSUxMID0gRkFMU0UNCiMjICBEaXNhYmxlIFVJRF9ET01BSU4gY2hlY2sgd2hlbiBzdWJtaXQgYSBqb2INClRSVVNUX1VJRF9ET01BSU4gPSBUUlVFDQoNCiMjICBVc2UgVENQIGluc3RlYWQgb2YgVURQLCBhbmQgY2FjaGUgVENQIHNvY2tldHMNCiMjICAobW9yZSByZWxpYWJsZSBvbiBzb21lIGNsb3VkIG5ldHdvcmtzKQ0KVVBEQVRFX0NPTExFQ1RPUl9XSVRIX1RDUCA9IFRydWUNCkNPTExFQ1RPUl9TT0NLRVRfQ0FDSEVfU0laRSA9IDEwMDANCg0KIyMgQXZvaWQgY3Jhc2hlcyBvZiB0aGUgY29sbGVjdG9yDQpDT05ET1JfREVWRUxPUEVSU19DT0xMRUNUT1IgPSBOT05FDQpFT0YNCiMNCi91c3Ivc2Jpbi9jb25kb3Jfc3RvcmVfY3JlZCAtcCAxMjM0NSBhZGQgLWYgL2V0Yy9jb25kb3IvY29uZG9yX2NyZWRlbnRpYWwNCiMNCnNlcnZpY2UgY29uZG9yIHN0YXJ0DQo=
+user_data_b64 = IyEvYmluL2Jhc2gNCkhPU1RJUD0kKGhvc3RuYW1lIC1JIHwgYXdrICd7cHJpbnQgJDF9JykNCiMNCmVjaG8gMCA+IC9zeXMvZnMvc2VsaW51eC9lbmZvcmNlDQojDQp5dW0gaW5zdGFsbCAteSB3Z2V0DQojDQpjZCAvZXRjL3l1bS5yZXBvcy5kDQp3Z2V0IGh0dHA6Ly9yZXNlYXJjaC5jcy53aXNjLmVkdS9odGNvbmRvci95dW0vcmVwby5kL2h0Y29uZG9yLXN0YWJsZS1yaGVsNy5yZXBvDQp5dW0gaW5zdGFsbCAteSBjb25kb3ItYWxsDQpDVUlEPSQoaWQgY29uZG9yIHwgYXdrICd7cHJpbnQgJDF9J3wgY3V0IC1kJz0nIC1mMnxjdXQgLWQnKCcgLWYxKQ0KQ0dJRD0kKGlkIGNvbmRvciB8IGF3ayAne3ByaW50ICQyfSd8IGN1dCAtZCc9JyAtZjJ8Y3V0IC1kJygnIC1mMSkNCiMNCmNhdCA8PCBFT0YgPi9ldGMvY29uZG9yL2NvbmRvcl9jb25maWcubG9jYWwNCg0KREFFTU9OX0xJU1QgPSBNQVNURVIsIFNUQVJURA0KQ09ORE9SX0hPU1QgPSAlaXB2NCUNCkNPTkRPUl9BRE1JTiA9IHJvb3RAJWlwdjQlDQoNCiMgUHJlc2VydmUgVUlEIG9mIHN1Ym1pdHRpbmcgdXNlcg0KVUlEX0RPTUFJTiA9ICoNClRSVVNUX1VJRF9ET01BSU4gPSBUcnVlDQpTT0ZUX1VJRF9ET01BSU4gPSBUcnVlDQoNCkNPTkRPUl9JRFMgPSAkQ1VJRC4kQ0dJRA0KUVVFVUVfU1VQRVJfVVNFUlMgPSByb290LCBjb25kb3INCkhJR0hQT1JUID0gNDIwMDANCkxPV1BPUlQgPSA0MTAwMA0KTkVUV09SS19JTlRFUkZBQ0UgPSAkSE9TVElQDQpOT19ETlMgPSBUcnVlDQpERUZBVUxUX0RPTUFJTl9OQU1FID0gSU5GTi1QRA0KRU9GDQoNCmNhdCA8PEVPRj4gL2V0Yy9jb25kb3IvY29uZmlnLmQvY2VudG9zNw0KIyMjIyMjIyMjIyMjIyMjIyMjIw0KIyBDZW50b3M3IENsdXN0ZXIgIw0KIyMjIyMjIyMjIyMjIyMjIyMjIw0KU0VDX0RBRU1PTl9BVVRIRU5USUNBVElPTiA9IHJlcXVpcmVkDQpTRUNfREFFTU9OX0lOVEVHUklUWSA9IHJlcXVpcmVkDQpTRUNfREFFTU9OX0FVVEhFTlRJQ0FUSU9OX01FVEhPRFMgPSBwYXNzd29yZA0KU0VDX0NMSUVOVF9BVVRIRU5USUNBVElPTl9NRVRIT0RTID0gcGFzc3dvcmQsZnMsZ3NpLGtlcmJlcm9zDQpTRUNfUEFTU1dPUkRfRklMRSA9IC9ldGMvY29uZG9yL2NvbmRvcl9jcmVkZW50aWFsDQpTRUNfRU5BQkxFX01BVENIX1BBU1NXT1JEX0FVVEhFTlRJQ0FUSU9OID0gVHJ1ZQ0KDQpBTExPV19EQUVNT04gPSBjb25kb3JfcG9vbEAqLCBzdWJtaXQtc2lkZUBtYXRjaHNlc3Npb24NCiMjIFNob3J0IGRlc2NyaXB0aW9uOiBDaGFuZ2UgdGhpcyB0byBhbiBhcHByb3ByaWF0ZSBuYW1lICgzMCBjaHIuIGxpbWl0KQ0KQ09MTEVDVE9SX05BTUUgPSBDZXJuVk0gY2x1c3RlciBhdCBcJChDT05ET1JfSE9TVCkNCiMjICBTZXRzIGhvdyBvZnRlbiB0aGUgY29uZG9yX25lZ290aWF0b3Igc3RhcnRzIGEgbmVnb3RpYXRpb24gY3ljbGUuDQojIyAgSXQgaXMgZGVmaW5lZCBpbiBzZWNvbmRzIGFuZCBkZWZhdWx0cyB0byA2MCAoMSBtaW51dGUpLg0KTkVHT1RJQVRPUl9JTlRFUlZBTCA9IDIwDQojIyAgV2hlbiBpcyB0aGlzIG1hY2hpbmUgd2lsbGluZyB0byBzdGFydCBhIGpvYj8NClNUQVJUID0gVFJVRQ0KIyMgIFdoZW4gdG8gc3VzcGVuZCBhIGpvYj8NClNVU1BFTkQgPSBGQUxTRQ0KIyMgIFdoZW4gdG8gbmljZWx5IHN0b3AgYSBqb2I/DQojIyAgKGFzIG9wcG9zZWQgdG8ga2lsbGluZyBpdCBpbnN0YW50YW5lb3VzbHkpDQpQUkVFTVBUID0gRkFMU0UNCiMjICBXaGVuIHRvIGluc3RhbnRhbmVvdXNseSBraWxsIGEgcHJlZW1wdGluZyBqb2INCiMjICAoZS5nLiBpZiBhIGpvYiBpcyBpbiB0aGUgcHJlLWVtcHRpbmcgc3RhZ2UgZm9yIHRvbyBsb25nKQ0KS0lMTCA9IEZBTFNFDQojIyAgRGlzYWJsZSBVSURfRE9NQUlOIGNoZWNrIHdoZW4gc3VibWl0IGEgam9iDQpUUlVTVF9VSURfRE9NQUlOID0gVFJVRQ0KDQojIyAgVXNlIFRDUCBpbnN0ZWFkIG9mIFVEUCwgYW5kIGNhY2hlIFRDUCBzb2NrZXRzDQojIyAgKG1vcmUgcmVsaWFibGUgb24gc29tZSBjbG91ZCBuZXR3b3JrcykNClVQREFURV9DT0xMRUNUT1JfV0lUSF9UQ1AgPSBUcnVlDQpDT0xMRUNUT1JfU09DS0VUX0NBQ0hFX1NJWkUgPSAxMDAwDQoNCiMjIEF2b2lkIGNyYXNoZXMgb2YgdGhlIGNvbGxlY3Rvcg0KQ09ORE9SX0RFVkVMT1BFUlNfQ09MTEVDVE9SID0gTk9ORQ0KRU9GDQovdXNyL3NiaW4vY29uZG9yX3N0b3JlX2NyZWQgLXAgMTIzNDUgYWRkIC1mIC9ldGMvY29uZG9yL2NvbmRvcl9jcmVkZW50aWFsDQpzeXN0ZW1jdGwgc3RhcnQgY29uZG9yDQpzeXN0ZW1jdGwgZW5hYmxlIGNvbmRvcg0K
 image_id = $IMAGE_ID
 aws_secret_access_key = $EC2_SECRET_KEY
 aws_access_key_id = $EC2_ACCESS_KEY
@@ -185,27 +180,27 @@ min_vms = $MIN_VMS
 
 EOF
 #
-service elastiq start
+systemctl start elastiq
+systemctl enable elastiq
 #
-adduser scientific
-mkdir /home/scientific/jobs/
-mkdir /home/scientific/jobs/log/
-mkdir /home/scientific/jobs/output/
-mkdir /home/scientific/jobs/error/
-cat<< EOF > /home/scientific/jobs/test.jdl
+mkdir /home/centos/jobs/
+mkdir /home/centos/jobs/log/
+mkdir /home/centos/jobs/output/
+mkdir /home/centos/jobs/error/
+cat<< EOF > /home/centos/jobs/test.jdl
 Universe = vanilla
-Executable = /home/scientific/jobs/test.sh
-Log = /home/scientific/jobs/log/test.log.\$(Cluster).\$(Process)
-Output = /home/scientific/jobs/output/test.out.\$(Cluster).\$(Process)
-Error = /home/scientific/jobs/error/test.err.\$(Cluster).\$(Process)
+Executable = /home/centos/jobs/test.sh
+Log = /home/centos/jobs/log/test.log.\$(Cluster).\$(Process)
+Output = /home/centos/jobs/output/test.out.\$(Cluster).\$(Process)
+Error = /home/centos/jobs/error/test.err.\$(Cluster).\$(Process)
 Queue 10
 EOF
-cat /tmp/test.sh > /home/scientific/jobs/test.sh
-chown scientific:root -R /home/scientific/jobs/
-chmod u+x -R /home/scientific/jobs/
+cat /tmp/test.sh > /home/centos/jobs/test.sh
+chown centos:root -R /home/centos/jobs/
+chmod u+x -R /home/centos/jobs/
 #
-cat<<EOF>/root/README.txt
+cat<<EOF>/home/centos/README.txt
 Root user can't submit condor jobs.
-You can submit jobs using scientific user [ sudo su scientific ] and you can test condor using the test.jdl file [ condor_submit jobs/test.jdl ].
+You can submit jobs using centos user and you can test condor using the test.jdl file [ condor_submit jobs/test.jdl ].
 Good fun! :)
 EOF

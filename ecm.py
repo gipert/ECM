@@ -2,27 +2,32 @@ import datetime
 import sys
 from subprocess import call
 
-scripts = [(1, "Scientific Linux", "scientific", "master_files/SL6-master"),
+scripts = [(1, "Scientific Linux 6", "scientific", "master_files/SL6-master"),
            (2, "Ubuntu", "ubuntu", "master_files/Ubuntu-master"),
-           (3, "uCernVM", "ucernvm", "master_files/uCernVM-master")]
-
-method = [(1, "Dashboard. [INFO] You use the genereted userdata file as portinstallation file."),
-           (2, "Euca2ools. [WARNING] You have to have euca2ools.2.x installed in your PC."),
-           (3, "Nova CLI. [WARNING] You have to have nova-client installed in your PC.")]
+           (3, "uCernVM", "ucernvm", "master_files/uCernVM-master"),
+           (4, "CentOS 7", "centos", "master_files/CentOS7-master")]
            
-SL_images = [(1, "SL67-x86_64-20151017", "ami-09877a78"),
-          (2, "SL66-x86_64-20150521", "ami-d558813f"),
-          (3, "SL66-x86_64-20150309", "ami-55829d60"),
-          (4, "SL66-x86_64-20150131", "ami-dc9da54c"),
-          (5, "SL65-x86_64-20151029", "ami-d760f202"),
-          (6, "Other image. [WARNING] You have to know the EC2-id of image", "ami-")]
+SL_images = [(1, "SL68-x86_64-20161107", "ami-6b1406fc"),
+          (2, "SL67-x86_64-20151017", "ami-09877a78"),
+          (3, "SL66-x86_64-20150521", "ami-d558813f"),
+          (4, "SL66-x86_64-20150309", "ami-55829d60"),
+          (5, "SL66-x86_64-20150131", "ami-dc9da54c"),
+          (6, "SL65-x86_64-20151029", "ami-d760f202"),
+          (7, "Other image. [WARNING] You have to know the EC2-id of image", "ami-")]
+          
 ubuntu_images = [(1, "ubuntu-trusty-20141025", "ami-84616f8f"),
           (2, "Other image. [WARNING] You have to know the EC2-id of image", "ami-")]
+          
 cern_images = [(1, "uCernVM 3.4.3", "ami-fcfdc38d"),
           (2, "uCernVM 2.3-0", "ami-c84d00a7"),
           (3, "uCernVM 1.18.14", "ami-aebb6e5f"),
           (4, "uCernVM 1.18.13", "ami-7ad4ec84"),
           (5, "Other image. [WARNING] You have to know the EC2-id of image", "ami-")]
+
+centos_images = [(1, "CentOS 7", "ami-9f3da3fc"),
+                 (2, "CentOS-7-x86_64-GenericCloud-1608", "ami-3f901eed"),
+                 (3, "Other image. [WARNING] You have to know the EC2-id of image", "ami-")]
+           
 if __name__ == "__main__":
 
     number_version, info_version=sys.version.split(" (default")
@@ -71,7 +76,7 @@ if __name__ == "__main__":
                 image = input()
                 try:
                     m, b, g = SL_images[int(image)-1]
-                    if int(image) == 6:
+                    if int(image) == 7:
                         print("\nInsert the EC2-id (something like ami-00000000)")
                         if int(major_version) < 3:
                             image_number = raw_input("ami-")
@@ -118,6 +123,29 @@ if __name__ == "__main__":
                 try:
                     m, b, g = cern_images[int(image)-1]
                     if int(image) == 5:
+                        print("\nInsert the EC2-id (something like ami-00000000)")
+                        if int(major_version) < 3:
+                            image_number = raw_input("ami-")
+                        else:
+                            image_number = input("ami-")
+                        if len(image_number) == 8:
+                            image_id = "%s%s" %(g, image_number)
+                        else:
+                            exit("Incorrect EC2-id.")
+                    elif int(image) < 1:
+                        exit("[ERROR] Wrong selection.")
+                    else:
+                        image_id = g
+                except IndexError:
+                    exit("[ERROR] Wrong selection.")
+            elif n == 4:
+                print("\nSelect the image for your %s based master and your %s based WNs:" %(d, d)) 
+                for m, b, g in centos_images:
+                    print("%s: %s" % (m, b))
+                image = input()
+                try:
+                    m, b, g = centos_images[int(image)-1]
+                    if int(image) == 3:
                         print("\nInsert the EC2-id (something like ami-00000000)")
                         if int(major_version) < 3:
                             image_number = raw_input("ami-")
@@ -182,7 +210,7 @@ if __name__ == "__main__":
             cl_options = ""
             call([command, cl_options], shell=True)
 
-            print("Now you can use the %s file to instantiate the master node of your elastiq cluster." %user_data_file)
+            print("\nNow you can use the %s file to instantiate the master node of your elastiq cluster." %user_data_file)
 
     except IndexError:
         exit("[ERROR] Wrong selection.")
