@@ -55,10 +55,10 @@ if __name__ == "__main__":
     idle_time = params['IDLE_TIME']
     key_name = params['KEY_NAME']
 
-    print("\nChoose the Operating System (OS) flavor that you want to use for your master and worker nodes:")
+    print("\nChoose the Operating System (OS) type that you want to use for your master and worker nodes:")
     for n, d, so, f in scripts:
         print("%s: %s" % (n, d))
-    which = input("OS flavor ?\n")
+    which = input("OS type ?\n")
     ctrl=int(which)
 
     try:
