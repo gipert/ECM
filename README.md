@@ -7,13 +7,17 @@ ecm (Elastic Cluster Maker) is a simple program that help you to configure and i
 You only have to follow some simple step:
 
 1. Use your EC2 credential
+```bash
 $ source ec2rc.sh
+```
 where ec2rc is the ec2rc file of the project where you want to instantiate your cluster.
 
 2. Edit the cluster.conf file
 
 3. Launch the ecm program and follow the instructions
+```bash
 $ python ecm.py 
+```
 
 ## Complite documentation
 
