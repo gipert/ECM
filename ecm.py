@@ -48,7 +48,7 @@ if __name__ == "__main__":
         except:
             line=line
         params[k] = v.strip()
-    w_flavor = params['WNS_FLAVOR']
+    flavor_vms = params['FLAVOR_VMS']
     max_vms = params['MAX_VMS']
     min_vms = params['MIN_VMS']
     jobs_per_vm = params['JOBS_PER_VM']
@@ -182,7 +182,7 @@ if __name__ == "__main__":
             cl_options = ""
             call([command, cl_options], shell=True)
             
-            command = "sed -i \"s|instance-flavor|%s|g\" %s" %(w_flavor, user_data_file)
+            command = "sed -i \"s|instance-flavor|%s|g\" %s" %(flavor_vms, user_data_file)
             cl_options = ""
             call([command, cl_options], shell=True)
             
@@ -210,7 +210,7 @@ if __name__ == "__main__":
             cl_options = ""
             call([command, cl_options], shell=True)
 
-            print("\nNow you can use the %s file to instantiate the master node of your elastiq cluster." %user_data_file)
+            print("\nNow you can use the %s file to instantiate the master node of your elastic cluster." %user_data_file)
 
     except IndexError:
         exit("[ERROR] Wrong selection.")
