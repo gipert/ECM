@@ -1,6 +1,6 @@
 # ECM 
 
-ecm (Elastic Cluster Maker) is a simple program that help you to configure and instantiate your elastic cluster.
+ecm (Elastic Cluster Maker) is a simple python script that help you to configure and instantiate your elastic cluster.
 
 ## Create your userdata file
 
@@ -25,7 +25,7 @@ Using a CentOS7 based cluster you can submit jobs using the docker universe of H
 
 ## Customize your cluster
 
-You can customize your cluster edit the master_files and the slave_files before run the script.
+You can customize your cluster edit the master_files and the slave_files before running the script.
 
 
 ## Complite documentation
