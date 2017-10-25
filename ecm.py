@@ -1,11 +1,12 @@
 import datetime
 import sys
+import base64
 from subprocess import call
 
-scripts = [(1, "Scientific Linux 6", "scientific", "master_files/SL6-master"),
-           (2, "Ubuntu", "ubuntu", "master_files/Ubuntu-master"),
-           (3, "uCernVM", "ucernvm", "master_files/uCernVM-master"),
-           (4, "CentOS 7", "centos", "master_files/CentOS7-master")]
+scripts = [(1, "Scientific Linux 6", "scientific", "master_files/SL6-master", "slave_files/SL6-slave"),
+           (2, "Ubuntu", "ubuntu", "master_files/Ubuntu-master", "slave_files/Ubuntu-slave"),
+           (3, "uCernVM", "ucernvm", "master_files/uCernVM-master", "slave_files/uCernVM-slave"),
+           (4, "CentOS 7", "centos", "master_files/CentOS7-master", "slave_files/CentOS7-slave")]
            
 SL_images = [(1, "SL68-x86_64-20161107", "ami-6b1406fc"),
           (2, "SL67-x86_64-20151017", "ami-09877a78"),
@@ -56,18 +57,21 @@ if __name__ == "__main__":
     key_name = params['KEY_NAME']
 
     print("\nChoose the Operating System (OS) type that you want to use for your master and worker nodes:")
-    for n, d, so, f in scripts:
+    for n, d, so, f, slf in scripts:
         print("%s: %s" % (n, d))
-    which = input("OS type ?\n")
+    which = input()
     ctrl=int(which)
 
     try:
         if ctrl < 1:
             exit("[ERROR] Wrong selection.")
         else:
-            n, d, s, f = scripts[ctrl-1]
+            n, d, s, f, slf = scripts[ctrl-1]
 
             user_data_file = "master-%s-%s-%s" %(s, today, now)
+            slave_file = open(slf, 'r')
+            userdata = slave_file.read()
+            slave_userdata = base64.b64encode(userdata)
 
             if n == 1:
                 print("\nSelect the image for your %s based master and your %s based WNs:" %(d, d)) 
@@ -209,7 +213,11 @@ if __name__ == "__main__":
             command = "sed -i \"s|key-name|%s|g\" %s " %(key_name, user_data_file)
             cl_options = ""
             call([command, cl_options], shell=True)
-
+            
+            command = "sed -i \"s|slave-userdata|%s|g\" %s " %(slave_userdata, user_data_file)
+            cl_options = ""
+            call([command, cl_options], shell=True)
+            
             print("\nNow you can use the %s file to instantiate the master node of your elastic cluster." %user_data_file)
 
     except IndexError:
