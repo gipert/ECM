@@ -84,7 +84,7 @@ chmod u+x -R /home/cernvm/jobs/
 #
 cat<<EOF>/root/README.txt
 Root user can't submit condor jobs.
-You can submit jobs using cernvm user and you can test condor using the test.jdl file [ condor_submit jobs/test.jdl ].
+You can submit jobs using cernvm user [su - cernvm ] and you can test condor using the test.jdl file [ condor_submit jobs/test.jdl ].
 Good fun! :)
 EOF
 

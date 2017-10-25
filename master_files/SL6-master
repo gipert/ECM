@@ -220,6 +220,6 @@ chmod u+x -R /home/scientific/jobs/
 #
 cat<<EOF>/root/README.txt
 Root user can't submit condor jobs.
-You can submit jobs using scientific user [ sudo su scientific ] and you can test condor using the test.jdl file [ condor_submit jobs/test.jdl ].
+You can submit jobs using scientific user [ su - scientific ] and you can test condor using the test.jdl file [ condor_submit jobs/test.jdl ].
 Good fun! :)
 EOF
