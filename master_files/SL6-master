@@ -201,6 +201,19 @@ Output = /home/scientific/jobs/output/test.out.\$(Cluster).\$(Process)
 Error = /home/scientific/jobs/error/test.err.\$(Cluster).\$(Process)
 Queue 10
 EOF
+cat<< EOF > /home/scientific/jobs/test-docker.jdl
+universe                = docker
+docker_image            = debian
+executable              = /bin/cat
+arguments               = /etc/hosts
+should_transfer_files   = YES
+when_to_transfer_output = ON_EXIT
+Log = /home/scientific/jobs/log/test-docker.log.\$(Cluster).\$(Process)
+Output = /home/scientific/jobs/output/test-docker.out.\$(Cluster).\$(Process)
+Error = /home/scientific/jobs/error/test-docker.err.\$(Cluster).\$(Process)
+request_memory          = 100M
+Queue 10
+EOF
 cat /tmp/test.sh > /home/scientific/jobs/test.sh
 chown scientific:root -R /home/scientific/jobs/
 chmod u+x -R /home/scientific/jobs/

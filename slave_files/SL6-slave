@@ -79,3 +79,9 @@ EOF
 /usr/sbin/condor_store_cred -p 12345 add -f /etc/condor/condor_credential
 #
 service condor start
+yum install -y docker-io
+groupadd docker
+usermod -aG docker condor
+service docker start
+chkconfig docker on
+condor_reconfig
