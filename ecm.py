@@ -174,47 +174,47 @@ if __name__ == "__main__":
             cl_options = ""
             call([command, cl_options], shell=True)
             
-            command = "sed -i \"s|access-key|$EC2_ACCESS_KEY| \" %s" %user_data_file
+            command = "sed -i.bak \"s|access-key|$EC2_ACCESS_KEY| \" %s" %user_data_file
             cl_options = ""
             call([command, cl_options], shell=True)
             
-            command = "sed -i \"s|secret-key|$EC2_SECRET_KEY|g\" %s " %user_data_file
+            command = "sed -i.bak \"s|secret-key|$EC2_SECRET_KEY|g\" %s " %user_data_file
             cl_options = ""
             call([command, cl_options], shell=True)
             
-            command = "sed -i \"s|ec2-url|$EC2_URL|g\" %s" %user_data_file
+            command = "sed -i.bak \"s|ec2-url|$EC2_URL|g\" %s" %user_data_file
             cl_options = ""
             call([command, cl_options], shell=True)
             
-            command = "sed -i \"s|instance-flavor|%s|g\" %s" %(flavor_vms, user_data_file)
+            command = "sed -i.bak \"s|instance-flavor|%s|g\" %s" %(flavor_vms, user_data_file)
             cl_options = ""
             call([command, cl_options], shell=True)
             
-            command = "sed -i \"s|idle-time|%s|g\" %s " %(idle_time, user_data_file)
+            command = "sed -i.bak \"s|idle-time|%s|g\" %s " %(idle_time, user_data_file)
             cl_options = ""
             call([command, cl_options], shell=True)
         
-            command = "sed -i \"s|max-vms|%s|g\" %s " %(max_vms, user_data_file)
+            command = "sed -i.bak \"s|max-vms|%s|g\" %s " %(max_vms, user_data_file)
             cl_options = ""
             call([command, cl_options], shell=True)
             
-            command = "sed -i \"s|min-vms|%s|g\" %s " %(min_vms, user_data_file)
+            command = "sed -i.bak \"s|min-vms|%s|g\" %s " %(min_vms, user_data_file)
             cl_options = ""
             call([command, cl_options], shell=True)
         
-            command = "sed -i \"s|image-id|%s|g\" %s " %(image_id, user_data_file)
+            command = "sed -i.bak \"s|image-id|%s|g\" %s " %(image_id, user_data_file)
             cl_options = ""
             call([command, cl_options], shell=True)
             
-            command = "sed -i \"s|jobs-per-vm|%s|g\" %s " %(jobs_per_vm, user_data_file)
+            command = "sed -i.bak \"s|jobs-per-vm|%s|g\" %s " %(jobs_per_vm, user_data_file)
             cl_options = ""
             call([command, cl_options], shell=True)
 
-            command = "sed -i \"s|key-name|%s|g\" %s " %(key_name, user_data_file)
+            command = "sed -i.bak \"s|key-name|%s|g\" %s " %(key_name, user_data_file)
             cl_options = ""
             call([command, cl_options], shell=True)
             
-            command = "sed -i \"s|slave-userdata|%s|g\" %s " %(slave_userdata, user_data_file)
+            command = "sed -i.bak \"s|slave-userdata|%s|g\" %s " %(slave_userdata, user_data_file)
             cl_options = ""
             call([command, cl_options], shell=True)
             
