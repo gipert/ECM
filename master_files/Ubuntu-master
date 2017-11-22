@@ -61,9 +61,9 @@ EOF
 # CONDOR CONFIG #
 #################
 cat << EOF >/tmp/Cluster 
-###############
-# $SO Cluster #
-###############
+##################
+# Ubuntu Cluster #
+##################
 SEC_DAEMON_AUTHENTICATION = required
 SEC_DAEMON_INTEGRITY = required
 SEC_DAEMON_AUTHENTICATION_METHODS = password
