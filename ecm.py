@@ -199,7 +199,7 @@ if __name__ == "__main__":
       (all_images, num) = list_filter("cern")
       image_id = select_image(all_images, num)
 
-   #CentOS7
+   #CentOS6
    elif n == 4:
       (all_images, num) = list_filter("centos 6")
       image_id = select_image(all_images, num)

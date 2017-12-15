@@ -155,9 +155,9 @@ EOF
 # CONDOR CONFIG #
 #################
 cat << EOF >/tmp/Cluster 
-###############
-# SL6 Cluster #
-###############
+###################
+# CENTOS6 Cluster #
+###################
 SEC_DAEMON_AUTHENTICATION = required
 SEC_DAEMON_INTEGRITY = required
 SEC_DAEMON_AUTHENTICATION_METHODS = password
@@ -251,7 +251,7 @@ HIGHPORT = 42000
 LOWPORT = 41000
 EOF
 #
-cat /tmp/Cluster > /etc/condor/config.d/SL6
+cat /tmp/Cluster > /etc/condor/config.d/CentOS6
 #
 /usr/sbin/condor_store_cred -p 12345 add -f /etc/condor/condor_credential
 #

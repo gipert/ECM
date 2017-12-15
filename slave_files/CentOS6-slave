@@ -43,10 +43,10 @@ NO_DNS = True
 DEFAULT_DOMAIN_NAME = INFN-PD
 EOF
 #
-cat <<EOF> /etc/condor/config.d/SL6
-##############
-# SL Cluster #
-##############
+cat <<EOF> /etc/condor/config.d/CentOS6
+###################
+# CENTOS6 Cluster #
+###################
 SEC_DAEMON_AUTHENTICATION = required
 SEC_DAEMON_INTEGRITY = required
 SEC_DAEMON_AUTHENTICATION_METHODS = password
