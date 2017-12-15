@@ -17,11 +17,12 @@ class color:
    UNDERLINE = '\033[4m'
    END = '\033[0m'
 
-scripts = [(1, "Scientific Linux 6", "scientific", "master_files/SL6-master", "slave_files/SL6-slave"),
-           (2, "Ubuntu", "ubuntu", "master_files/Ubuntu-master", "slave_files/Ubuntu-slave"),
-           (3, "uCernVM", "ucernvm", "master_files/uCernVM-master", "slave_files/uCernVM-slave"),
-           (4, "CentOS 6", "centos6", "master_files/CentOS6-master", "slave_files/CentOS6-slave"),
-           (5, "CentOS 7", "centos7", "master_files/CentOS7-master", "slave_files/CentOS7-slave")]
+scripts = [(1, "Scientific Linux 6", "SL6", "master_files/SL6-master", "slave_files/SL6-slave"),
+           (2, "Scientific Linux 7", "SL7", "master_files/SL7-master", "slave_files/SL7-slave"),
+           (3, "Ubuntu", "ubuntu", "master_files/Ubuntu-master", "slave_files/Ubuntu-slave"),
+           (4, "uCernVM", "ucernvm", "master_files/uCernVM-master", "slave_files/uCernVM-slave"),
+           (5, "CentOS 6", "centos6", "master_files/CentOS6-master", "slave_files/CentOS6-slave"),
+           (6, "CentOS 7", "centos7", "master_files/CentOS7-master", "slave_files/CentOS7-slave")]
 
 #global variables
 
@@ -188,24 +189,29 @@ if __name__ == "__main__":
    if n == 1:
       (all_images, num) = list_filter("sl6")
       image_id = select_image(all_images, num)
+
+   #SL7 cluster
+   elif n == 2:
+      (all_images, num) = list_filter("sl7")
+      image_id = select_image(all_images, num)
           
    #UBUNTU cluster
-   elif n == 2:
+   elif n == 3:
       (all_images, num) = list_filter("ubuntu")
       image_id = select_image(all_images, num)
 
    #CernVM
-   elif n == 3:
+   elif n == 4:
       (all_images, num) = list_filter("cern")
       image_id = select_image(all_images, num)
 
    #CentOS6
-   elif n == 4:
+   elif n == 5:
       (all_images, num) = list_filter("centos 6")
       image_id = select_image(all_images, num)
          
    #CentOS7
-   elif n == 5:
+   elif n == 6:
       (all_images, num) = list_super_filter("cent", "centos 6")
       image_id = select_image(all_images, num)
 
