@@ -20,7 +20,8 @@ class color:
 scripts = [(1, "Scientific Linux 6", "scientific", "master_files/SL6-master", "slave_files/SL6-slave"),
            (2, "Ubuntu", "ubuntu", "master_files/Ubuntu-master", "slave_files/Ubuntu-slave"),
            (3, "uCernVM", "ucernvm", "master_files/uCernVM-master", "slave_files/uCernVM-slave"),
-           (4, "CentOS 7", "centos", "master_files/CentOS7-master", "slave_files/CentOS7-slave")]
+           (4, "CentOS 6", "centos6", "master_files/CentOS6-master", "slave_files/CentOS6-slave"),
+           (5, "CentOS 7", "centos7", "master_files/CentOS7-master", "slave_files/CentOS7-slave")]
 
 #global variables
 
@@ -197,9 +198,14 @@ if __name__ == "__main__":
    elif n == 3:
       (all_images, num) = list_filter("cern")
       image_id = select_image(all_images, num)
-         
+
    #CentOS7
    elif n == 4:
+      (all_images, num) = list_filter("centos 6")
+      image_id = select_image(all_images, num)
+         
+   #CentOS7
+   elif n == 5:
       (all_images, num) = list_super_filter("cent", "centos 6")
       image_id = select_image(all_images, num)
 

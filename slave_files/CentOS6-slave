@@ -1,0 +1,96 @@
+#!/bin/bash
+HOSTIP=$(hostname -I | awk '{print $1}')
+#
+setenforce 0
+#
+service iptables stop
+#
+yum install -y wget
+#
+wget http://research.cs.wisc.edu/htcondor/yum/RPM-GPG-KEY-HTCondor
+rpm --import RPM-GPG-KEY-HTCondor
+cd /etc/yum.repos.d
+wget http://90.147.77.142/repo/htcondor/repo.d/htcondor-stable-rhel6.repo
+#
+yum install -y yum-priorities
+cat << EOF >>/etc/yum.repos.d/htcondor-stable-rhel6.repo
+check_obsoletes=1
+priority=1
+EOF
+yum clean all
+#
+yum install -y condor-all-8.4.9
+#
+CUID=$(id condor | awk '{print $1}'| cut -d'=' -f2|cut -d'(' -f1)
+CGID=$(id condor | awk '{print $2}'| cut -d'=' -f2|cut -d'(' -f1)
+#
+cat << EOF >/etc/condor/condor_config.local
+DAEMON_LIST = MASTER, STARTD
+CONDOR_HOST = %ipv4%
+CONDOR_ADMIN = root@%ipv4%
+
+# Preserve UID of submitting user
+UID_DOMAIN = *
+TRUST_UID_DOMAIN = True
+SOFT_UID_DOMAIN = True
+
+CONDOR_IDS = $CUID.$CGID
+QUEUE_SUPER_USERS = root, condor
+HIGHPORT = 42000
+LOWPORT = 41000
+NETWORK_INTERFACE = $HOSTIP
+NO_DNS = True
+DEFAULT_DOMAIN_NAME = INFN-PD
+EOF
+#
+cat <<EOF> /etc/condor/config.d/SL6
+##############
+# SL Cluster #
+##############
+SEC_DAEMON_AUTHENTICATION = required
+SEC_DAEMON_INTEGRITY = required
+SEC_DAEMON_AUTHENTICATION_METHODS = password
+SEC_CLIENT_AUTHENTICATION_METHODS = password,fs,gsi,kerberos
+SEC_PASSWORD_FILE = /etc/condor/condor_credential
+SEC_ENABLE_MATCH_PASSWORD_AUTHENTICATION = True
+
+ALLOW_DAEMON = condor_pool@*, submit-side@matchsession
+## Short description: Change this to an appropriate name (30 chr. limit)
+COLLECTOR_NAME = CernVM cluster at \$(CONDOR_HOST)
+##  Sets how often the condor_negotiator starts a negotiation cycle.
+##  It is defined in seconds and defaults to 60 (1 minute).
+NEGOTIATOR_INTERVAL = 20
+##  When is this machine willing to start a job?
+START = TRUE
+##  When to suspend a job?
+SUSPEND = FALSE
+##  When to nicely stop a job?
+##  (as opposed to killing it instantaneously)
+PREEMPT = FALSE
+##  When to instantaneously kill a preempting job
+##  (e.g. if a job is in the pre-empting stage for too long)
+KILL = FALSE
+##  Disable UID_DOMAIN check when submit a job
+TRUST_UID_DOMAIN = TRUE
+
+##  Use TCP instead of UDP, and cache TCP sockets
+##  (more reliable on some cloud networks)
+UPDATE_COLLECTOR_WITH_TCP = True
+COLLECTOR_SOCKET_CACHE_SIZE = 1000
+
+## Avoid crashes of the collector
+CONDOR_DEVELOPERS_COLLECTOR = NONE
+EOF
+#
+/usr/sbin/condor_store_cred -p 12345 add -f /etc/condor/condor_credential
+#
+service condor start
+#
+yum install -y epel-release
+#
+yum install -y docker-io
+groupadd docker
+usermod -aG docker condor
+service docker start
+chkconfig docker on
+condor_reconfig
