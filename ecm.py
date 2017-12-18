@@ -4,6 +4,9 @@ import base64
 from subprocess import call
 from subprocess import PIPE
 import subprocess
+import itertools
+import threading
+import time
 
 class color:
    PURPLE = '\033[95m'
@@ -58,6 +61,7 @@ def list_create():
       n = n+1
       n_name_ami = [n_name , n_ami]
       all_name_ami.append(n_name_ami)
+   return True
 
 
 def list_filter(filter):
@@ -87,7 +91,7 @@ def select_so():
    print color.RED + '\nChoose the Operating System (OS) type that you want to use for your cluster:' + color.END
    for n, d, so, f, slf in scripts:
       print("%s: %s" % (n, d))
-   which = input()
+   which = input("\n Choose OS ==> ")
    try:
       ctrl=int(which)
       if ctrl < 1:
@@ -120,7 +124,7 @@ def select_image(all_images, num):
    print color.RED + '\nSelect the image for your ' + color.END + color.BOLD + '%s' %d + color.END + color.RED +' based cluster:' + color.END
    for m, b, g in images:
       print("%s: %s" % (m, b))
-   image = input()
+   image = input("\n Image ==> ")
    try:
       m, b, g = images[int(image)-1]
       if int(image) == num:
@@ -167,6 +171,14 @@ def params(file_name):
    key_name = params['KEY_NAME']
    return (flavor_vms, max_vms, min_vms, jobs_per_vm, idle_time, key_name)
 
+def loading():
+    for c in itertools.cycle(['|', '/', '-', '\\']):
+        if done:
+            break
+        sys.stdout.write('\rGetting the list of images: please wait ' + c)
+        sys.stdout.flush()
+        time.sleep(0.1)
+
 # main
            
 if __name__ == "__main__":
@@ -176,8 +188,11 @@ if __name__ == "__main__":
    
    (flavor_vms, max_vms, min_vms, jobs_per_vm, idle_time, key_name) = params('ecm.conf')
 
-   list_create()
-    
+   done = False
+   t = threading.Thread(target=loading)
+   t.start()
+   done =list_create()
+   
    (n, d, s, f, slf) = select_so()
        
    user_data_file = "master-%s-%s-%s" %(s, today, now)
