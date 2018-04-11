@@ -14,10 +14,12 @@ JOBS_PER_VM=jobs-per-vm
 IDLE_TIME=idle-time
 KEY_NAME=key-name
 SLAVE_USERDATA=slave-userdata
-
 ###########
 # CA CERT #
 ###########
+cd /tmp
+wget https://pki.cesnet.cz/certs/chain_TERENA_SSL_CA_3.pem
+#
 cat<< EOF >/tmp/cacerts.txt
 
 INFN CA 2015
@@ -55,6 +57,10 @@ gfvV03R4GXxP+0EWFXac4tiFFu6YC4Hu7ou38tnnW/nx+xurvnsxIW7ZDaLGKCd+
 VJmb+qhU3NJvDPGjDuksXp0idfhbK6R2dFz7UFS1DYdRit7jeZpou5D4LaIL0CQ/
 KjUrC7M6W+Zhicc0ihbwb03ppLv9/vbj06MY4+HMivKiK1oxd+Q=
 -----END CERTIFICATE-----
+EOF
+
+cat /tmp/chain_TERENA_SSL_CA_3.pem >>/tmp/cacerts.txt
+cat<< EOF >>/tmp/cacerts.txt
 
 UNIPD CA
 ================
@@ -229,7 +235,7 @@ cat /tmp/Cluster > /etc/condor/config.d/Ubuntu
 service condor start
 #
 apt-get install -y python-boto
-wget https://github.com/dberzano/elastiq/releases/download/v0.9.10/python-elastiq_0.9.10-1py27_all.deb
+wget http://90.147.77.142/repo/elastiq/ubuntu/python-elastiq_0.9.10-1py27_all.deb
 dpkg -i python-elastiq_0.9.10-1py27_all.deb
 #
 cat /tmp/cacerts.txt >> /usr/lib/python2.7/dist-packages/boto/cacerts/cacerts.txt

@@ -18,6 +18,11 @@ SLAVE_USERDATA=slave-userdata
 ###########
 # CA CERT #
 ###########
+yum install -y wget epel-release
+#
+cd /tmp
+wget https://pki.cesnet.cz/certs/chain_TERENA_SSL_CA_3.pem
+#
 cat<< EOF >/tmp/cacerts.txt
 
 INFN CA 2015
@@ -55,6 +60,10 @@ gfvV03R4GXxP+0EWFXac4tiFFu6YC4Hu7ou38tnnW/nx+xurvnsxIW7ZDaLGKCd+
 VJmb+qhU3NJvDPGjDuksXp0idfhbK6R2dFz7UFS1DYdRit7jeZpou5D4LaIL0CQ/
 KjUrC7M6W+Zhicc0ihbwb03ppLv9/vbj06MY4+HMivKiK1oxd+Q=
 -----END CERTIFICATE-----
+EOF
+
+cat /tmp/chain_TERENA_SSL_CA_3.pem >>/tmp/cacerts.txt
+cat<< EOF >>/tmp/cacerts.txt
 
 UNIPD CA
 ================
@@ -197,8 +206,6 @@ EOF
 ############################
 # MASTER NODE INSTALLATION #
 ############################
-yum install -y wget epel-release
-#
 cd /etc/yum.repos.d
 wget http://90.147.77.142/repo/htcondor/repo.d/htcondor-stable-rhel7.repo
 yum clean all
@@ -226,7 +233,7 @@ cat /tmp/Cluster > /etc/condor/config.d/SL7
 #
 service condor start
 #
-yum localinstall -y https://github.com/dberzano/elastiq/releases/download/v0.9.10/python-elastiq-0.9.10-1.py27.noarch.rpm
+yum localinstall -y http://90.147.77.142/repo/elastiq/rhel7/python-elastiq-0.9.10-1.py27.noarch.rpm
 #
 cat /tmp/cacerts.txt >> /usr/lib/python2.7/site-packages/boto/cacerts/cacerts.txt
 #

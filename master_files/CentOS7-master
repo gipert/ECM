@@ -14,10 +14,16 @@ JOBS_PER_VM=jobs-per-vm
 IDLE_TIME=idle-time
 KEY_NAME=key-name
 SLAVE_USERDATA=slave-userdata
-
 ###########
 # CA CERT #
 ###########
+echo 0 > /sys/fs/selinux/enforce
+#
+yum install -y wget
+#
+cd /tmp
+wget https://pki.cesnet.cz/certs/chain_TERENA_SSL_CA_3.pem
+#
 cat<< EOF >/tmp/cacerts.txt
 
 INFN CA 2015
@@ -55,6 +61,10 @@ gfvV03R4GXxP+0EWFXac4tiFFu6YC4Hu7ou38tnnW/nx+xurvnsxIW7ZDaLGKCd+
 VJmb+qhU3NJvDPGjDuksXp0idfhbK6R2dFz7UFS1DYdRit7jeZpou5D4LaIL0CQ/
 KjUrC7M6W+Zhicc0ihbwb03ppLv9/vbj06MY4+HMivKiK1oxd+Q=
 -----END CERTIFICATE-----
+EOF
+
+cat /tmp/chain_TERENA_SSL_CA_3.pem >>/tmp/cacerts.txt
+cat<< EOF >>/tmp/cacerts.txt
 
 UNIPD CA
 ================
@@ -149,7 +159,6 @@ Nr4TDea9Y355e6cJDUCrat2PisP29owaQgVR1EX1n6diIWgVIEM8med8vSTYqZEX
 c4g/VhsxOBi0cQ+azcgOno4uG+GMmIPLHzHxREzGBHNJdmAPx/i9F4BrLunMTA5a
 mnkPIAou1Z5jJh5VkpTYghdae9C8x49OhgQ=
 -----END CERTIFICATE-----
-
 EOF
 #################
 # CONDOR CONFIG #
@@ -197,10 +206,6 @@ EOF
 ############################
 # MASTER NODE INSTALLATION #
 ############################
-echo 0 > /sys/fs/selinux/enforce
-#
-yum install -y wget
-#
 cd /etc/yum.repos.d
 wget http://90.147.77.142/repo/htcondor/repo.d/htcondor-stable-rhel7.repo
 yum clean all
@@ -229,7 +234,7 @@ cat /tmp/Cluster > /etc/condor/config.d/CentOS7
 systemctl start condor
 systemctl enable condor
 #
-yum localinstall -y https://github.com/dberzano/elastiq/releases/download/v0.9.10/python-elastiq-0.9.10-1.py27.noarch.rpm
+yum localinstall -y http://90.147.77.142/repo/elastiq/rhel7/python-elastiq-0.9.10-1.py27.noarch.rpm
 #
 cat /tmp/cacerts.txt >> /usr/lib/python2.7/site-packages/boto/cacerts/cacerts.txt
 #
