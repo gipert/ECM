@@ -50,7 +50,7 @@ Content-Disposition: attachment; filename="test_script.sh"
 
 #!/bin/bash
 sed -i "s|Activity,Machine|Machine,MyType,Activity,TargetType|g" /usr/lib/python2.6/site-packages/elastiq/plugins/htcondor.py
-sed -i "s|'condor_q', '-global', '-attributes', 'JobStatus', '-long'|'condor_q', '-all', '-global', '-attributes', 'JobStatus', '-long'|g" /usr/lib/python2.6/site-packages/elastiq/plugins/htcondor.py
+sed -i "s|'condor_q', '-attributes', 'JobStatus', '-long'|'condor_q', '-all', '-global', '-attributes', 'JobStatus', '-long'|g" /usr/lib/python2.6/site-packages/elastiq/plugins/htcondor.py
 service elastiq stop
 service elastiq start
 ###############
