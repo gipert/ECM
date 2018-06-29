@@ -2,6 +2,22 @@
 
 ecm (Elastic Cluster Maker) is a simple python script that help you to configure and instantiate your elastic cluster.
 
+## Prerequisites
+
+You have to install euca2ools software.
+
+1. on CentOS
+
+```bash
+sudo yum install euca2ools
+```
+
+2. on Ubuntu
+
+```bash
+sudo apt-get install euca2ools
+```
+
 ## Create your userdata file
 
 You only have to follow some simple step:
