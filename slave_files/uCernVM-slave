@@ -1,0 +1,15 @@
+[amiconfig]
+plugins=condor vaf-setup
+
+[condor]
+use_ips=true
+highport=42000
+condor_user=condor
+lowport=41000
+condor_secret=12345
+condor_master=%ipv4%
+condor_group=condor
+uid_domain=*
+
+[vaf-setup]
+node_type=slave

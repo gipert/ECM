@@ -14,12 +14,11 @@ JOBS_PER_VM=jobs-per-vm
 IDLE_TIME=idle-time
 KEY_NAME=key-name
 SLAVE_USERDATA=slave-userdata
+
 ###########
 # CA CERT #
 ###########
-echo 0 > /sys/fs/selinux/enforce
-#
-yum install -y wget
+yum install -y wget epel-release
 #
 cd /tmp
 wget https://pki.cesnet.cz/certs/chain_TERENA_SSL_CA_3.pem
@@ -159,14 +158,15 @@ Nr4TDea9Y355e6cJDUCrat2PisP29owaQgVR1EX1n6diIWgVIEM8med8vSTYqZEX
 c4g/VhsxOBi0cQ+azcgOno4uG+GMmIPLHzHxREzGBHNJdmAPx/i9F4BrLunMTA5a
 mnkPIAou1Z5jJh5VkpTYghdae9C8x49OhgQ=
 -----END CERTIFICATE-----
+
 EOF
 #################
 # CONDOR CONFIG #
 #################
 cat << EOF >/tmp/Cluster 
-###################
-# CentOS7 Cluster #
-###################
+###############
+# SL7 Cluster #
+###############
 SEC_DAEMON_AUTHENTICATION = required
 SEC_DAEMON_INTEGRITY = required
 SEC_DAEMON_AUTHENTICATION_METHODS = password
@@ -227,12 +227,11 @@ QUEUE_SUPER_USERS = root, condor
 HIGHPORT = 42000
 LOWPORT = 41000
 EOF
-cat /tmp/Cluster > /etc/condor/config.d/CentOS7
+cat /tmp/Cluster > /etc/condor/config.d/SL7
 #
 /usr/sbin/condor_store_cred -p 12345 add -f /etc/condor/condor_credential
 #
-systemctl start condor
-systemctl enable condor
+service condor start
 #
 yum localinstall -y http://90.147.77.142/repo/elastiq/rhel7/python-elastiq-0.9.10-1.py27.noarch.rpm
 #
@@ -251,8 +250,8 @@ check_vms_every_s = 45
 [ec2]
 flavour = $FLAVOR
 api_url = $EC2_URL
+user_data_b64 = $SLAVE_USERDATA
 image_id = $IMAGE_ID
-user_data_b64 = IyEvYmluL2Jhc2gNCmVjaG8gMCA+IC9zeXMvZnMvc2VsaW51eC9lbmZvcmNlDQoNCiMgbW91bnQgc2hhcmVkIGRpcmVjdG9yaWVzDQpta2RpciAtcCAvY29tbW9uDQptb3VudCAtdCBuZnMgMTAuNjQuMjguNTA6L2RhdGFOZnMgL2NvbW1vbg0KDQojIGluc3RhbGwgYW5kIGNvbmZpZ3VyZSBIVENvbmRvcg0KY2QgL2V0Yy95dW0ucmVwb3MuZA0Kd2dldCBodHRwOi8vOTAuMTQ3Ljc3LjE0Mi9yZXBvL2h0Y29uZG9yL3JlcG8uZC9odGNvbmRvci1zdGFibGUtcmhlbDcucmVwbw0KeXVtIGluc3RhbGwgLXkgY29uZG9yLWFsbC04LjQuOQ0KDQpIT1NUSVA9JChob3N0bmFtZSAtSSB8IGF3ayAne3ByaW50ICQxfScpDQpDVUlEPSQoaWQgY29uZG9yIHwgYXdrICd7cHJpbnQgJDF9J3wgY3V0IC1kJz0nIC1mMnxjdXQgLWQnKCcgLWYxKQ0KQ0dJRD0kKGlkIGNvbmRvciB8IGF3ayAne3ByaW50ICQyfSd8IGN1dCAtZCc9JyAtZjJ8Y3V0IC1kJygnIC1mMSkNCiMNCmNhdCA8PCBFT0YgPiAvZXRjL2NvbmRvci9jb25kb3JfY29uZmlnLmxvY2FsDQpEQUVNT05fTElTVCA9IE1BU1RFUiwgU1RBUlREDQpDT05ET1JfSE9TVCA9ICVpcHY0JQ0KQ09ORE9SX0FETUlOID0gcm9vdEAlaXB2NCUNCg0KIyBQcmVzZXJ2ZSBVSUQgb2Ygc3VibWl0dGluZyB1c2VyDQpVSURfRE9NQUlOID0gKg0KVFJVU1RfVUlEX0RPTUFJTiA9IFRydWUNClNPRlRfVUlEX0RPTUFJTiA9IFRydWUNCg0KQ09ORE9SX0lEUyA9ICRDVUlELiRDR0lEDQpRVUVVRV9TVVBFUl9VU0VSUyA9IHJvb3QsIGNvbmRvcg0KSElHSFBPUlQgPSA0MjAwMA0KTE9XUE9SVCA9IDQxMDAwDQpORVRXT1JLX0lOVEVSRkFDRSA9ICRIT1NUSVANCk5PX0ROUyA9IFRydWUNCkRFRkFVTFRfRE9NQUlOX05BTUUgPSBJTkZOLVBEDQoNCkRPQ0tFUl9WT0xVTUVTID0gQ09NTU9ODQpET0NLRVJfVk9MVU1FX0RJUl9DT01NT04gPSAvY29tbW9uOi9jb21tb24NCkRPQ0tFUl9NT1VOVF9WT0xVTUVTID0gQ09NTU9ODQpFT0YNCg0KY2F0IDw8IEVPRiA+IC9ldGMvY29uZG9yL2NvbmZpZy5kL2NlbnRvczcNCiMjIyMjIyMjIyMjIyMjIyMjIyMNCiMgQ2VudG9zNyBDbHVzdGVyICMNCiMjIyMjIyMjIyMjIyMjIyMjIyMNClNFQ19EQUVNT05fQVVUSEVOVElDQVRJT04gPSByZXF1aXJlZA0KU0VDX0RBRU1PTl9JTlRFR1JJVFkgPSByZXF1aXJlZA0KU0VDX0RBRU1PTl9BVVRIRU5USUNBVElPTl9NRVRIT0RTID0gcGFzc3dvcmQNClNFQ19DTElFTlRfQVVUSEVOVElDQVRJT05fTUVUSE9EUyA9IHBhc3N3b3JkLGZzLGdzaSxrZXJiZXJvcw0KU0VDX1BBU1NXT1JEX0ZJTEUgPSAvZXRjL2NvbmRvci9jb25kb3JfY3JlZGVudGlhbA0KU0VDX0VOQUJMRV9NQVRDSF9QQVNTV09SRF9BVVRIRU5USUNBVElPTiA9IFRydWUNCg0KQUxMT1dfREFFTU9OID0gY29uZG9yX3Bvb2xAKiwgc3VibWl0LXNpZGVAbWF0Y2hzZXNzaW9uDQojIyBTaG9ydCBkZXNjcmlwdGlvbjogQ2hhbmdlIHRoaXMgdG8gYW4gYXBwcm9wcmlhdGUgbmFtZSAoMzAgY2hyLiBsaW1pdCkNCkNPTExFQ1RPUl9OQU1FID0gQ2VyblZNIGNsdXN0ZXIgYXQgXCQoQ09ORE9SX0hPU1QpDQojIyAgU2V0cyBob3cgb2Z0ZW4gdGhlIGNvbmRvcl9uZWdvdGlhdG9yIHN0YXJ0cyBhIG5lZ290aWF0aW9uIGN5Y2xlLg0KIyMgIEl0IGlzIGRlZmluZWQgaW4gc2Vjb25kcyBhbmQgZGVmYXVsdHMgdG8gNjAgKDEgbWludXRlKS4NCk5FR09USUFUT1JfSU5URVJWQUwgPSAyMA0KIyMgIFdoZW4gaXMgdGhpcyBtYWNoaW5lIHdpbGxpbmcgdG8gc3RhcnQgYSBqb2I/DQpTVEFSVCA9IFRSVUUNCiMjICBXaGVuIHRvIHN1c3BlbmQgYSBqb2I/DQpTVVNQRU5EID0gRkFMU0UNCiMjICBXaGVuIHRvIG5pY2VseSBzdG9wIGEgam9iPw0KIyMgIChhcyBvcHBvc2VkIHRvIGtpbGxpbmcgaXQgaW5zdGFudGFuZW91c2x5KQ0KUFJFRU1QVCA9IEZBTFNFDQojIyAgV2hlbiB0byBpbnN0YW50YW5lb3VzbHkga2lsbCBhIHByZWVtcHRpbmcgam9iDQojIyAgKGUuZy4gaWYgYSBqb2IgaXMgaW4gdGhlIHByZS1lbXB0aW5nIHN0YWdlIGZvciB0b28gbG9uZykNCktJTEwgPSBGQUxTRQ0KIyMgIERpc2FibGUgVUlEX0RPTUFJTiBjaGVjayB3aGVuIHN1Ym1pdCBhIGpvYg0KVFJVU1RfVUlEX0RPTUFJTiA9IFRSVUUNCg0KIyMgIFVzZSBUQ1AgaW5zdGVhZCBvZiBVRFAsIGFuZCBjYWNoZSBUQ1Agc29ja2V0cw0KIyMgIChtb3JlIHJlbGlhYmxlIG9uIHNvbWUgY2xvdWQgbmV0d29ya3MpDQpVUERBVEVfQ09MTEVDVE9SX1dJVEhfVENQID0gVHJ1ZQ0KQ09MTEVDVE9SX1NPQ0tFVF9DQUNIRV9TSVpFID0gMTAwMA0KDQojIyBBdm9pZCBjcmFzaGVzIG9mIHRoZSBjb2xsZWN0b3INCkNPTkRPUl9ERVZFTE9QRVJTX0NPTExFQ1RPUiA9IE5PTkUNCkVPRg0KDQovdXNyL3NiaW4vY29uZG9yX3N0b3JlX2NyZWQgLXAgMTIzNDUgYWRkIC1mIC9ldGMvY29uZG9yL2NvbmRvcl9jcmVkZW50aWFsDQpzeXN0ZW1jdGwgc3RhcnQgY29uZG9yDQpzeXN0ZW1jdGwgZW5hYmxlIGNvbmRvcg0KDQojIGNvbmZpZ3VyZSBkb2NrZXINCnl1bSBpbnN0YWxsIC15IGRvY2tlci1pbw0KZ3JvdXBhZGQgZG9ja2VyDQp1c2VybW9kIC1hRyBkb2NrZXIgY29uZG9yDQpjYXQgPDwgRU9GID4gL2V0Yy9kb2NrZXIvZGFlbW9uLmpzb24NCnsNCgkiaW5zZWN1cmUtcmVnaXN0cmllcyIgOiBbICIxMC42NC4yOC41MDo1MDAwIiBdDQp9DQpFT0YNCnN5c3RlbWN0bCBzdGFydCBkb2NrZXINCnN5c3RlbWN0bCBlbmFibGUgZG9ja2VyDQpkb2NrZXIgbG9naW4gLXUgdXNlciAtcCAkKGNhdCAvaG9tZS9odWJfcGFzc3dkKSAxMC42NC4yOC41MDo1MDAwDQpjb25kb3JfcmVjb25maWc=
 aws_secret_access_key = $EC2_SECRET_KEY
 aws_access_key_id = $EC2_ACCESS_KEY
 key_name = $KEY_NAME
@@ -262,43 +261,43 @@ max_vms = $MAX_VMS
 min_vms = $MIN_VMS
 
 EOF
-#
 sed -i "s|Activity,Machine|Machine,MyType,Activity,TargetType|g" /usr/lib/python2.7/site-packages/elastiq/plugins/htcondor.py
 sed -i "s|'condor_q', '-global', '-attributes', 'JobStatus', '-long'|'condor_q', '-all', '-global', '-attributes', 'JobStatus', '-long'|g" /usr/lib/python2.7/site-packages/elastiq/plugins/htcondor.py
-systemctl start elastiq
-systemctl enable elastiq
 #
-mkdir /home/centos/jobs/
-mkdir /home/centos/jobs/log/
-mkdir /home/centos/jobs/output/
-mkdir /home/centos/jobs/error/
-cat<< EOF > /home/centos/jobs/test.jdl
+service elastiq start
+#
+adduser scientific
+mkdir /home/scientific/jobs/
+mkdir /home/scientific/jobs/log/
+mkdir /home/scientific/jobs/output/
+mkdir /home/scientific/jobs/error/
+cat<< EOF > /home/scientific/jobs/test.jdl
 Universe = vanilla
-Executable = /home/centos/jobs/test.sh
-Log = /home/centos/jobs/log/test.log.\$(Cluster).\$(Process)
-Output = /home/centos/jobs/output/test.out.\$(Cluster).\$(Process)
-Error = /home/centos/jobs/error/test.err.\$(Cluster).\$(Process)
+Executable = /home/scientific/jobs/test.sh
+Log = /home/scientific/jobs/log/test.log.\$(Cluster).\$(Process)
+Output = /home/scientific/jobs/output/test.out.\$(Cluster).\$(Process)
+Error = /home/scientific/jobs/error/test.err.\$(Cluster).\$(Process)
 Queue 10
 EOF
-cat<< EOF > /home/centos/jobs/test-docker.jdl
+cat<< EOF > /home/scientific/jobs/test-docker.jdl
 universe                = docker
 docker_image            = debian
 executable              = /bin/cat
 arguments               = /etc/hosts
 should_transfer_files   = YES
 when_to_transfer_output = ON_EXIT
-Log = /home/centos/jobs/log/test-docker.log.\$(Cluster).\$(Process)
-Output = /home/centos/jobs/output/test-docker.out.\$(Cluster).\$(Process)
-Error = /home/centos/jobs/error/test-docker.err.\$(Cluster).\$(Process)
+Log = /home/scientific/jobs/log/test-docker.log.\$(Cluster).\$(Process)
+Output = /home/scientific/jobs/output/test-docker.out.\$(Cluster).\$(Process)
+Error = /home/scientific/jobs/error/test-docker.err.\$(Cluster).\$(Process)
 request_memory          = 100M
 Queue 10
 EOF
-cat /tmp/test.sh > /home/centos/jobs/test.sh
-chown centos:root -R /home/centos/jobs/
-chmod u+x -R /home/centos/jobs/
+cat /tmp/test.sh > /home/scientific/jobs/test.sh
+chown scientific:root -R /home/scientific/jobs/
+chmod u+x -R /home/scientific/jobs/
 #
-cat<<EOF>/home/centos/README.txt
+cat<<EOF>/root/README.txt
 Root user can't submit condor jobs.
-You can submit jobs using centos user and you can test condor using the test.jdl file [ condor_submit jobs/test.jdl ].
+You can submit jobs using scientific user [ su - scientific ] and you can test condor using the test.jdl file [ condor_submit jobs/test.jdl ].
 Good fun! :)
 EOF
