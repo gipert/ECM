@@ -13,7 +13,7 @@ yum install -y condor-all-8.6.9
 HOSTIP=$(hostname -I | awk '{print $1}')
 CUID=$(id condor | awk '{print $1}'| cut -d'=' -f2|cut -d'(' -f1)
 CGID=$(id condor | awk '{print $2}'| cut -d'=' -f2|cut -d'(' -f1)
-#
+
 cat << EOF > /etc/condor/condor_config.local
 DAEMON_LIST = MASTER, STARTD
 CONDOR_HOST = %ipv4%
@@ -31,6 +31,11 @@ LOWPORT = 41000
 NETWORK_INTERFACE = $HOSTIP
 NO_DNS = True
 DEFAULT_DOMAIN_NAME = INFN-PD
+
+DOCKER_VOLUMES = COMMON
+DOCKER_VOLUME_DIR_COMMON = /common:/common
+DOCKER_MOUNT_VOLUMES = COMMON
+DOCKER_DROP_ALL_CAPABILITIES = false
 EOF
 
 cat << EOF > /etc/condor/config.d/centos7
@@ -45,7 +50,8 @@ SEC_PASSWORD_FILE = /etc/condor/condor_credential
 SEC_ENABLE_MATCH_PASSWORD_AUTHENTICATION = True
 
 ALLOW_DAEMON = condor_pool@*, submit-side@matchsession
-COLLECTOR_NAME = CernVM cluster at \$(CONDOR_HOST)
+COLLECTOR_NAME = GERDA cluster at \$(CONDOR_HOST)
+
 NEGOTIATOR_INTERVAL = 20
 START = TRUE
 SUSPEND = FALSE
@@ -73,3 +79,6 @@ EOF
 systemctl start docker
 systemctl enable docker
 condor_reconfig
+
+# configure singularity
+yum install -y singularity
